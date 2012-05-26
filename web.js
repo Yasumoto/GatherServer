@@ -1,6 +1,7 @@
 var async   = require('async');
 var express = require('express');
 var util    = require('util');
+var http    = require('http');
 
 // create an express webserver
 var app = express.createServer(
@@ -9,12 +10,12 @@ var app = express.createServer(
   express.bodyParser(),
   express.cookieParser(),
   // set this to a secret value to encrypt session cookies
-  express.session({ secret: process.env.SESSION_SECRET || 'secret123' }),
-  require('faceplate').middleware({
+  express.session({ secret: process.env.SESSION_SECRET || 'secret123' })
+/*  require('faceplate').middleware({
     app_id: process.env.FACEBOOK_APP_ID,
     secret: process.env.FACEBOOK_SECRET,
     scope:  'user_likes,user_photos,user_photo_video_tags'
-  })
+  })*/
 );
 
 // listen to the PORT given to us in the environment
@@ -42,6 +43,25 @@ app.dynamicHelpers({
     }
   },
 });
+
+function update_account_sharing(req, res) {
+  var options = {
+    host: 'api.parse.com',
+    port: 80,
+    path: '/1/classes/Poll',
+  };
+  http.get(options, function(res) {
+    console.log('STATUS: ' + res.statusCode);
+  }).on('error', function(e) {
+    console.log('problem with request: ' + e.message);
+  });
+
+  res.render('gather.ejs', {
+    layout: false,
+    req:    req,
+    app:    app
+  });
+}
 
 function render_page(req, res) {
   req.facebook.app(function(app) {
@@ -99,5 +119,8 @@ function handle_facebook_request(req, res) {
   }
 }
 
-app.get('/', handle_facebook_request);
-app.post('/', handle_facebook_request);
+
+//app.get('/', handle_facebook_request);
+//app.post('/', handle_facebook_request);
+
+app.get('/', update_account_sharing);
