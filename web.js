@@ -10,12 +10,12 @@ var app = express.createServer(
   express.bodyParser(),
   express.cookieParser(),
   // set this to a secret value to encrypt session cookies
-  express.session({ secret: process.env.SESSION_SECRET || 'secret123' })
-/*  require('faceplate').middleware({
+  express.session({ secret: process.env.SESSION_SECRET || 'secret123' }),
+  require('faceplate').middleware({
     app_id: process.env.FACEBOOK_APP_ID,
     secret: process.env.FACEBOOK_SECRET,
     scope:  'user_likes,user_photos,user_photo_video_tags'
-  })*/
+  })
 );
 
 // listen to the PORT given to us in the environment
@@ -52,6 +52,9 @@ function update_account_sharing(req, res) {
   };
   http.get(options, function(res) {
     console.log('STATUS: ' + res.statusCode);
+    console.log('BODY: ' + res.data);
+  }).on('data', function(chunk) {
+    console.log('BODY: ' + chunk);
   }).on('error', function(e) {
     console.log('problem with request: ' + e.message);
   });
@@ -120,7 +123,7 @@ function handle_facebook_request(req, res) {
 }
 
 
-//app.get('/', handle_facebook_request);
-//app.post('/', handle_facebook_request);
+app.get('/fb', handle_facebook_request);
+app.post('/fb', handle_facebook_request);
 
 app.get('/', update_account_sharing);
