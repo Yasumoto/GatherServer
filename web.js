@@ -56,17 +56,21 @@ function update_account_sharing(req, res) {
 
   https.get(options, function(response) {
     console.log('STATUS: ' + response.statusCode);
-    console.log('BODY: ' + response.data);
-  }).on('data', function(chunk) {
-    console.log('BODY: ' + chunk);
+    var polls = '';
+    response.on('data', function(data) {
+      console.log(data);
+      polls += data;
+    });
+    response.on('end', function() {
+      res.render('gather.ejs', {
+        layout:   false,
+        req:      req,
+        response: response,
+        polls:    polls
+      });
+    });
   }).on('error', function(e) {
     console.log('problem with request: ' + e.message);
-  });
-
-  res.render('gather.ejs', {
-    layout: false,
-    req:    req,
-    app:    app
   });
 }
 
