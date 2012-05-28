@@ -2,6 +2,7 @@ var async   = require('async');
 var express = require('express');
 var util    = require('util');
 var https   = require('https');
+var url     = require('url')
 
 // create an express webserver
 var app = express.createServer(
@@ -44,7 +45,18 @@ app.dynamicHelpers({
   },
 });
 
+function find_polls_to_update(username, polls) {
+  for (var i = 0; i < polls.length; i++) {
+    console.log("********" + i);
+    console.log(polls[i]);
+  }
+}
+
 function update_account_sharing(req, res) {
+  var username = url.parse(req.url, true).query.username;
+  console.log('USERNAME');
+  console.log(username);
+
   var options = {
     host: 'api.parse.com',
     path: '/1/classes/Poll',
@@ -62,6 +74,8 @@ function update_account_sharing(req, res) {
       polls += data;
     });
     response.on('end', function() {
+      var poll_objects = JSON.parse(polls).results;
+      find_polls_to_update(username, poll_objects);
       res.render('gather.ejs', {
         layout:   false,
         req:      req,
