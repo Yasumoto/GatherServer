@@ -1,7 +1,7 @@
 var async   = require('async');
 var express = require('express');
 var util    = require('util');
-var http    = require('http');
+var https   = require('https');
 
 // create an express webserver
 var app = express.createServer(
@@ -47,12 +47,16 @@ app.dynamicHelpers({
 function update_account_sharing(req, res) {
   var options = {
     host: 'api.parse.com',
-    port: 80,
     path: '/1/classes/Poll',
+    headers: {
+      'X-Parse-Application-Id': process.env.PARSE_APP_ID,
+      'X-Parse-Master-Key':   process.env.PARSE_MASTER_KEY
+    }
   };
-  http.get(options, function(res) {
-    console.log('STATUS: ' + res.statusCode);
-    console.log('BODY: ' + res.data);
+
+  https.get(options, function(response) {
+    console.log('STATUS: ' + response.statusCode);
+    console.log('BODY: ' + response.data);
   }).on('data', function(chunk) {
     console.log('BODY: ' + chunk);
   }).on('error', function(e) {
