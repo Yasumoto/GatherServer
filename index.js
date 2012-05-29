@@ -1,8 +1,6 @@
 var express = require('express');
 var acl_update = require('parse-user-acl-update');
 
-console.log(acl_update);
-
 // create an express webserver
 var app = express.createServer(
   express.logger(),
