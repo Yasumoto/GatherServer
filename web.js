@@ -10,7 +10,7 @@ var app = express.createServer(
   express.bodyParser(),
   express.cookieParser(),
   // set this to a secret value to encrypt session cookies
-  express.session({ secret: process.env.SESSION_SECRET || 'secret123' }),
+  express.session({ secret: process.env.SESSION_SECRET || 'secret123' })
 );
 
 // listen to the PORT given to us in the environment
