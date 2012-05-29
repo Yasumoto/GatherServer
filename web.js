@@ -1,4 +1,3 @@
-var async   = require('async');
 var express = require('express');
 var util    = require('util');
 var https   = require('https');
@@ -12,11 +11,6 @@ var app = express.createServer(
   express.cookieParser(),
   // set this to a secret value to encrypt session cookies
   express.session({ secret: process.env.SESSION_SECRET || 'secret123' }),
-  require('faceplate').middleware({
-    app_id: process.env.FACEBOOK_APP_ID,
-    secret: process.env.FACEBOOK_SECRET,
-    scope:  'user_likes,user_photos,user_photo_video_tags'
-  })
 );
 
 // listen to the PORT given to us in the environment
@@ -45,19 +39,19 @@ app.dynamicHelpers({
   },
 });
 
-function find_polls_to_update(username, userId, polls) {
-  for (var i = 0; i < polls.length; i++) {
-    if (polls[i].members && polls[i].members.indexOf(username) != -1) {
-      var access = polls[i].ACL;
+function find_objects_to_update(username, userId, objects) {
+  for (var i = 0; i < objects.length; i++) {
+    if (objects[i].members && objects[i].members.indexOf(username) != -1) {
+      var access = objects[i].ACL;
       console.log(JSON.stringify(access));
       console.log(userId);
       access[userId] = {'read': true, 'write': true};
-      save_new_poll_acl(polls[i].objectId, {'ACL': access});
+      save_new_object_acl(objects[i].objectId, {'ACL': access});
     }
   }
 }
 
-function save_new_poll_acl(objectId, updatedAccess) {
+function save_new_object_acl(objectId, updatedAccess) {
   var options = {
     host: 'api.parse.com',
     path: '/1/classes/Poll/'+objectId,
@@ -101,13 +95,13 @@ function update_account_sharing(req, res) {
 
   https.get(options, function(response) {
     console.log('STATUS: ' + response.statusCode);
-    var polls = '';
+    var objects = '';
     response.on('data', function(data) {
-      polls += data;
+      objects += data;
     });
     response.on('end', function() {
-      var poll_objects = JSON.parse(polls).results;
-      find_polls_to_update(username, userId, poll_objects);
+      var object_objects = JSON.parse(objects).results;
+      find_objects_to_update(username, userId, object_objects);
     });
   }).on('error', function(e) {
     console.log('problem with request: ' + e.message);

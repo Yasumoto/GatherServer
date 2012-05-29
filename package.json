@@ -1,14 +1,11 @@
 {
-  "name":    "facebook-template-node",
-  "version": "0.0.1",
+  "name":    "GatherServer",
+  "version": "0.2",
 
-  "description": "Template app for Heroku / Facebook integration, Node.js language",
+  "description": "Share objects that were created before a user made an account.",
 
   "dependencies": {
-    "async":     "0.1.18",
-    "ejs":       "0.4.3",
     "express":   "2.4.6",
-    "faceplate": "0.0.4"
   },
 
   "engines": {
