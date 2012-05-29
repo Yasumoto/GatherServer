@@ -5,7 +5,7 @@
 
   "dependencies": {
     "express": ">2.4.6",
-    "parse-user-acl-update": ">0.2.0"
+    "parse-user-acl-update": ">=0.3.0"
   },
 
   "author": "Joe Smith <yasumoto7@gmail.com>",

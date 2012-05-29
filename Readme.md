@@ -17,3 +17,6 @@ Copy the App ID and Secret from your Parse dashboard into your `.env`:
     echo PARSE_APP_ID=12345 >> .env
     echo PARSE_MASTER_KEY=abcde >> .env
 
+Change the name of the object, then you can test it out with 
+    
+    curl 'localhost:5000/?username=yasumoto7@gmail.com'

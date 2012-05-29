@@ -39,7 +39,7 @@ app.dynamicHelpers({
 
 
 function apply_user_acls(request, response) {
-  acl_update.update_account_sharing(request, response);
+  acl_update.update_account_sharing(request, response, 'Poll');
 }
 
 app.get('/', apply_user_acls);
