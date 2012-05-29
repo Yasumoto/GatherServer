@@ -1,12 +1,15 @@
 {
   "name":    "GatherServer",
-  "version": "0.2",
-
-  "description": "Share objects that were created before a user made an account.",
+  "description": "On a GET, update a user's associated objects to be shared with their account for a Parse app.",
+  "version": "0.1.0",
 
   "dependencies": {
-    "express":   "2.4.6",
+    "express": ">2.4.6",
+    "parse-user-acl-update": ">0.2.0"
   },
+
+  "author": "Joe Smith <yasumoto7@gmail.com>",
+  "main": "index",
 
   "engines": {
     "node": "0.6.x"
