@@ -45,17 +45,50 @@ app.dynamicHelpers({
   },
 });
 
-function find_polls_to_update(username, polls) {
+function find_polls_to_update(username, userId, polls) {
   for (var i = 0; i < polls.length; i++) {
-    console.log("********" + i);
-    console.log(polls[i]);
+    if (polls[i].members && polls[i].members.indexOf(username) != -1) {
+      var access = polls[i].ACL;
+      console.log(JSON.stringify(access));
+      console.log(userId);
+      access[userId] = {'read': true, 'write': true};
+      save_new_poll_acl(polls[i].objectId, {'ACL': access});
+    }
   }
 }
 
+function save_new_poll_acl(objectId, updatedAccess) {
+  var options = {
+    host: 'api.parse.com',
+    path: '/1/classes/Poll/'+objectId,
+    method: 'PUT',
+    headers: {
+      'X-Parse-Application-Id': process.env.PARSE_APP_ID,
+      'X-Parse-Master-Key':   process.env.PARSE_MASTER_KEY
+    }
+  };
+
+  var req = https.request(options, function(response) {
+    console.log('STATUS: ' + response.statusCode);
+    var data = '';
+    response.on('data', function(chunk) {
+      data += chunk;
+    });
+    response.on('error', function(er) {
+      console.log('problem with request: ' + er.message);
+    });
+    response.on('end', function() {
+      console.log(data);
+    });
+  });
+
+   req.write(JSON.stringify(updatedAccess));
+   req.end();
+}
+
 function update_account_sharing(req, res) {
+  var userId = url.parse(req.url, true).query.userId;
   var username = url.parse(req.url, true).query.username;
-  console.log('USERNAME');
-  console.log(username);
 
   var options = {
     host: 'api.parse.com',
@@ -70,82 +103,15 @@ function update_account_sharing(req, res) {
     console.log('STATUS: ' + response.statusCode);
     var polls = '';
     response.on('data', function(data) {
-      console.log(data);
       polls += data;
     });
     response.on('end', function() {
       var poll_objects = JSON.parse(polls).results;
-      find_polls_to_update(username, poll_objects);
-      res.render('gather.ejs', {
-        layout:   false,
-        req:      req,
-        response: response,
-        polls:    polls
-      });
+      find_polls_to_update(username, userId, poll_objects);
     });
   }).on('error', function(e) {
     console.log('problem with request: ' + e.message);
   });
 }
-
-function render_page(req, res) {
-  req.facebook.app(function(app) {
-    req.facebook.me(function(user) {
-      res.render('index.ejs', {
-        layout:    false,
-        req:       req,
-        app:       app,
-        user:      user
-      });
-    });
-  });
-}
-
-function handle_facebook_request(req, res) {
-
-  // if the user is logged in
-  if (req.facebook.token) {
-
-    async.parallel([
-      function(cb) {
-        // query 4 friends and send them to the socket for this socket id
-        req.facebook.get('/me/friends', { limit: 4 }, function(friends) {
-          req.friends = friends;
-          cb();
-        });
-      },
-      function(cb) {
-        // query 16 photos and send them to the socket for this socket id
-        req.facebook.get('/me/photos', { limit: 16 }, function(photos) {
-          req.photos = photos;
-          cb();
-        });
-      },
-      function(cb) {
-        // query 4 likes and send them to the socket for this socket id
-        req.facebook.get('/me/likes', { limit: 4 }, function(likes) {
-          req.likes = likes;
-          cb();
-        });
-      },
-      function(cb) {
-        // use fql to get a list of my friends that are using this app
-        req.facebook.fql('SELECT uid, name, is_app_user, pic_square FROM user WHERE uid in (SELECT uid2 FROM friend WHERE uid1 = me()) AND is_app_user = 1', function(result) {
-          req.friends_using_app = result;
-          cb();
-        });
-      }
-    ], function() {
-      render_page(req, res);
-    });
-
-  } else {
-    render_page(req, res);
-  }
-}
-
-
-app.get('/fb', handle_facebook_request);
-app.post('/fb', handle_facebook_request);
 
 app.get('/', update_account_sharing);
